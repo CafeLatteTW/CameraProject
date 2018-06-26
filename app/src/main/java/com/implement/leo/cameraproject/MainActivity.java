@@ -1,0 +1,89 @@
+package com.implement.leo.cameraproject;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+
+public class MainActivity extends AppCompatActivity {
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
+        final ImageView imgView = findViewById(R.id.imageView);
+
+        // Example of a call to a native method
+        TextView tv = findViewById(R.id.sample_text);
+        tv.setText(stringFromJNI());
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Bitmap bitmap = BitmapFactory.decodeResource(view.getContext().getResources(), R.drawable.captain);
+                int w = bitmap.getWidth(), h = bitmap.getHeight();
+                int[] pix = new int[w * h];
+                bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+                int [] resultPixes =  colorToGray(pix,w,h);
+                Bitmap result = Bitmap.createBitmap(w,h, Bitmap.Config.RGB_565);
+                result.setPixels(resultPixes, 0, w, 0, 0,w, h);
+                imgView.setImageBitmap(result);
+            }
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    // Used to load the 'native-lib' library on application startup.
+    static {
+        System.loadLibrary("native-lib");
+    }
+
+    /**
+     * A native method that is implemented by the 'native-lib' native library,
+     * which is packaged with this application.
+     */
+    public native String stringFromJNI();
+    public native int[] colorToGray(int[] buf, int w, int h);
+}
